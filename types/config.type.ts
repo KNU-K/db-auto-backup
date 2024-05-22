@@ -1,5 +1,5 @@
 type DatabaseConfiguration = {
-  dialect: string;
+  dialect: "mysql" | "oracle" | "mariadb";
   host: string;
   port: string | number;
   username: string;

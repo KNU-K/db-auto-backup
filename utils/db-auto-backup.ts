@@ -1,6 +1,3 @@
-/**
- *
- */
 import { exec } from "child_process";
 import * as fs from "fs";
 import DatabaseConfiguration from "../types/config.type";
@@ -13,6 +10,7 @@ class DBAutoBackup {
   private password: string;
   private database: string;
   private fileNameWithPath: string;
+
   constructor(config: DatabaseConfiguration, fileNameWithPath: string) {
     this.dialect = config.dialect;
     this.host = config.host;
@@ -22,35 +20,48 @@ class DBAutoBackup {
     this.database = config.database;
     this.fileNameWithPath = fileNameWithPath;
   }
-  private makeChildProcess() {
-    if (this.dialect == "mysql") {
-      // 명령어 실행
-      const mysqlDumpCommand: string = `mysqldump -h ${this.host} -P ${this.port} -u ${this.username} -p${this.password} ${this.database} > ${this.fileNameWithPath}`;
 
-      // 명령어 실행
-      exec(mysqlDumpCommand, (error: any, stdout, stderr) => {
+  private runCommand(command: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
         if (error) {
-          console.error(`exec error: ${error}`);
+          reject(new Error(`exec error: ${error.message}`));
           return;
         }
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
 
-        // 덤프 파일이 생성되었는지 확인
         fs.access(this.fileNameWithPath, fs.constants.F_OK, (err) => {
           if (err) {
-            console.error(`File not found: ${this.fileNameWithPath}`);
+            reject(new Error(`File not found: ${this.fileNameWithPath}`));
           } else {
             console.log(
               `Database dump was successful and saved to ${this.fileNameWithPath}`
             );
+            resolve();
           }
         });
       });
+    });
+  }
+
+  private getBackupCommand(): string {
+    switch (this.dialect) {
+      case "mysql":
+        return `mysqldump -h ${this.host} -P ${this.port} -u ${this.username} -p${this.password} ${this.database} > ${this.fileNameWithPath}`;
+      case "oracle":
+        return `expdp ${this.username}/${this.password}@${this.host}:${this.port}/${this.database} directory=DATA_PUMP_DIR dumpfile=${this.fileNameWithPath}`;
+      case "mariadb":
+        return `mysqldump -h ${this.host} -P ${this.port} -u ${this.username} -p${this.password} ${this.database} > ${this.fileNameWithPath}`;
+      default:
+        throw new Error("Unsupported database dialect");
     }
   }
-  public runBackup() {
-    this.makeChildProcess();
+
+  public runBackup(): Promise<void> {
+    const command = this.getBackupCommand();
+    return this.runCommand(command);
   }
 }
+
 export default DBAutoBackup;

@@ -9,5 +9,5 @@ A library to create Oracle database dumps automatically.
 You can install this package using npm:
 
 ```sh
-npm install db-auto-backup
+npm install db-auto-backup@1.1.0
 ```

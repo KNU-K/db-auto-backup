@@ -1,6 +1,6 @@
 {
   "name": "db-auto-backup",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A library to create database dumps automatically",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -24,11 +24,12 @@
     "url": "https://github.com/knu-k/db-auto-backup/issues"
   },
   "homepage": "https://github.com/knu-k/db-auto-backup#readme",
-  "dependencies": {
-    "db-auto-backup": "^1.0.2"
-  },
   "devDependencies": {
     "@types/node": "^20.12.12",
     "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "fs": "^0.0.1-security"
   }
 }
